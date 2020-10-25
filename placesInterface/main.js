@@ -8,28 +8,32 @@ module.exports = {
             name: 'Hello!'
         }
     },
-    search: async (location, radius, keyword, callback) => {
-        fetch('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + location.lat +',' + location.long + '&radius=' + radius + '&keyword=' + keyword + '&key=' + PLACES_KEY)
+    search: async (location, radius, keyword) => {
+        const response = await fetch('https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=' + location.lat +',' + location.long + '&radius=' + radius + '&keyword=' + keyword + '&key=' + PLACES_KEY)
         .then((result) => result.json())
         .then((places) => {
-            callback(places['results']);
+            console.log(places['results']);
+            return places['results'];
         })
         .catch((err) => {
             console.log(err);
-            callback(null);
+            return null;
         })
+        return response;
     },
-    detailed: async (place_id, callback) => {
-        fetch('https://maps.googleapis.com/maps/api/place/details/json?place_id=' + place_id + '&key=' + PLACES_KEY)
+    detailed: async (place_id) => {
+        const response = await fetch('https://maps.googleapis.com/maps/api/place/details/json?place_id=' + place_id + '&key=' + PLACES_KEY)
         .then((result) => result.json())
         .then((place) => {
-            callback(place);
+            return place.result;
         })
         .catch((err) => {
             console.log(err);
+            return null;
         })
+        return response
     },
-    detailedList: async function(place_ids, callback) {
+    detailedList: async function(place_ids) {
         detailedPlaces = [];
         fetches = [];
         for (const item of place_ids) {
@@ -37,15 +41,15 @@ module.exports = {
                 fetch('https://maps.googleapis.com/maps/api/place/details/json?place_id=' + item + '&key=' + PLACES_KEY)
                 .then((res) => res.json())
                 .then((place) => {
-                    detailedPlaces.push(place);
+                    detailedPlaces.push(place.result);
                 })
                 .catch((err) => {
                     console.log(err);
                 })
             )
         }
-        Promise.all(fetches).then(function() {
-            callback(detailedPlaces);
+        return Promise.all(fetches).then(function() {
+            return detailedPlaces;
         })
     }
 }
